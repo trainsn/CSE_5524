@@ -2,12 +2,7 @@ import pdb
 
 import numpy as np
 from skimage import color
-
-def normalize(v):
-    norm = np.linalg.norm(v)
-    if norm == 0:
-       return v
-    return v / norm
+from utils import *
 
 def color_histogram(img, bins=10):
     num_channels = 6
@@ -51,7 +46,6 @@ def color_moment(img):
     for i in range(3):
         moments[(i + 3) * moment_items: (i + 4) * moment_items] = similitudeMoments(hsv[:, :, i])
 
-    pdb.set_trace()
     moments = normalize(moments)
     return moments
 
