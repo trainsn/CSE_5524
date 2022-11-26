@@ -16,6 +16,8 @@ def getHistogram(edges, ors, mag, startX, startY, width, height, nbins):
         for x in range(startX, startX + width):
             if edges[y, x] > 0:
                 bin = math.floor(ors[y, x])
+                if bin == nbins:
+                    bin -= 1
                 hist[bin] += mag[y, x]
     return hist
 
