@@ -20,7 +20,7 @@ def similitudeMoments(im):
             Nvals.append(eta)
     return np.array(Nvals)
 
-def color_moment(img):
+def compute_color_moment(img):
     num_channels = 6
     moment_items = 7
     moments = np.zeros(moment_items * num_channels)

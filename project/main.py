@@ -6,6 +6,7 @@ import numpy as np
 from skimage.io import imread
 from pch import *
 from phog import *
+from color_moment import *
 
 def main():
     parser = argparse.ArgumentParser()
@@ -19,7 +20,7 @@ def main():
     img = imread(os.path.join("UCMerced_LandUse", "Images", "storagetanks", "storagetanks00.tif"))
 
     color_pch = compute_pch(img, nbins=args.color_bins, levels=args.color_hist_levels)
-    # color_pcm = color_moment(img)
+    color_mome = compute_color_moment(img)
 
     texture_phog = compute_phog(img, nbins=args.orient_bins, levels=args.phog_levels)
     pdb.set_trace()
