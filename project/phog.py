@@ -19,13 +19,17 @@ def getHistogram(edges, ors, mag, startX, startY, width, height, nbins):
                 hist[bin] += mag[y, x]
     return hist
 
-def compute_phog(img, nbins):
+def compute_phog(img, nbins, levels):
     # io.imshow(img)
     # plt.show()
     height, width = img.shape[:2]
 
     # Determine desc size
-    desc_size = nbins + 4 * nbins + 16 * nbins
+    coef = 1
+    desc_size = 0
+    for k in range(levels + 1):
+        desc_size += nbins * coef
+        coef *= 4
 
     # Convert the image to grayscale
     if img.shape[2] == 3:
@@ -66,31 +70,21 @@ def compute_phog(img, nbins):
     # plt.show()
 
     # Quantizing orientations into bins.
-    pdb.set_trace()
     grad_o = (grad_o / np.pi + 0.5) * nbins
 
     # Creating the descriptor.
     desc = np.zeros(desc_size, dtype=np.float32)
 
-    # Level 0
-    desc[0:nbins] = getHistogram(edges, grad_o, grad_m, 0, 0, width, height, nbins)
-
-    # Level 1
-    desc[nbins:nbins * 2] = getHistogram(edges, grad_o, grad_m, 0, 0, width // 2, height // 2, nbins)
-    desc[nbins * 2:nbins * 3] = getHistogram(edges, grad_o, grad_m, width // 2, 0, width // 2, height // 2, nbins)
-    desc[nbins * 3:nbins * 4] = getHistogram(edges, grad_o, grad_m, 0, height // 2, width // 2, height // 2, nbins)
-    desc[nbins * 4:nbins * 5] = getHistogram(edges, grad_o, grad_m, width // 2, height // 2, width // 2, height // 2, nbins)
-
-    # Level 2
-    wstep = width // 4
-    hstep = height // 4
-    binPos = 5 # Next free section in the histogram
-    for i in range(4):
-        for j in range(4):
-            desc[nbins * binPos:nbins * (binPos+1)] = getHistogram(edges, grad_o, grad_m, i * wstep, j * hstep, wstep, hstep, nbins)
-            binPos += 1
-
-    # Normalizing the histogram
-    desc = normalize(desc)
+    blocks = 1
+    binPos = 0 # Next free section in the histogram
+    for k in range(levels + 1):
+        wstep = width // blocks
+        hstep = height // blocks
+        for i in range(blocks):
+            for j in range(blocks):
+                desc[nbins * binPos:nbins * (binPos + 1)] = \
+                    getHistogram(edges, grad_o, grad_m, i * wstep, j * hstep, wstep, hstep, nbins)
+                binPos += 1
+        blocks *= 2
 
     return desc

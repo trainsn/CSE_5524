@@ -14,7 +14,6 @@ def color_histogram(img, bins=10):
     for i in range(3):
         hist[(i + 3) * bins: (i + 4) * bins] = np.histogram(hsv[:, :, i], bins=bins, range=(0., 1.))[0]
 
-    hist = normalize(hist)
     return hist
 
 def similitudeMoments(im):
@@ -48,5 +47,3 @@ def color_moment(img):
 
     moments = normalize(moments)
     return moments
-
-
