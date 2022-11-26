@@ -1,20 +1,6 @@
-import pdb
-
 import numpy as np
 from skimage import color
 from utils import *
-
-def color_histogram(img, bins=10):
-    num_channels = 6
-    hist = np.zeros(bins * num_channels, dtype=np.int)
-    for i in range(3):
-        hist[i * bins: (i + 1) * bins] = np.histogram(img[:, :, i], bins=bins, range=(0, 255))[0]
-
-    hsv = color.rgb2hsv(img)
-    for i in range(3):
-        hist[(i + 3) * bins: (i + 4) * bins] = np.histogram(hsv[:, :, i], bins=bins, range=(0., 1.))[0]
-
-    return hist
 
 def similitudeMoments(im):
     Nvals = []
@@ -47,3 +33,4 @@ def color_moment(img):
 
     moments = normalize(moments)
     return moments
+

@@ -87,4 +87,6 @@ def compute_phog(img, nbins, levels):
                 binPos += 1
         blocks *= 2
 
+    desc = normalize(desc)
+
     return desc
