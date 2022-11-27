@@ -1,16 +1,17 @@
 import os
 import argparse
-import numpy as np
-
 import pdb
+from collections import defaultdict
+import numpy as np
 
 def main():
     parser = argparse.ArgumentParser()
+    parser.add_argument('--retrieved-class', type=str, required=True, help='The class want to retrieve')
+    parser.add_argument('--retrieved-idx', type=int, required=True, help='The retrieved image index in class')
     parser.add_argument('--num-retrieved', type=int, default=12, help='Number of images retrieved')
     parser.add_argument('--feat-type', type=str, required=True, help='raw, cm, pch, phog')
     parser.add_argument('--level', type=int, default=0, help='level for pch or phog')
-    parser.add_argument('--dist-metric', type=str, help='SAD, SSD, NCC')
-    parser.add_argument('--dataset', type=str, help='val or test')
+    parser.add_argument('--dist-metric', type=str, required=True, help='SAD, SSD, NCC')
     args = parser.parse_args()
     print(args)
 
@@ -20,7 +21,16 @@ def main():
 
     n_classes = len(classes)
     train_size, val_size, test_size = 80, 10, 10
+    valtest_size = val_size + test_size
+    size_per_class = train_size + val_size + test_size
 
+    class2idx = defaultdict(lambda: -1)
+    for i in range(n_classes):
+        class2idx[classes[i]] = i
+
+    rnd_idx = np.load("rnd_idx.npy")
+    ori2permed = np.zeros(size_per_class, dtype=int)
+    ori2permed[rnd_idx] = np.arange(size_per_class)
 
     if args.feat_type == "raw":
         feat_dir = os.path.join("UCMerced_LandUse", "Images")
@@ -37,28 +47,21 @@ def main():
     elif args.dist_metric == "NCC":
         dist = np.load(os.path.join(feat_dir, "NCC.npy"))
 
-    candi = []
-    if args.dataset == "val":
-        for i in range(n_classes):
-            candi.extend(np.arange(i * (val_size + test_size), i * (val_size + test_size) + val_size))
-        valtest_size = val_size
-    elif args.dataset == "test":
-        for i in range(n_classes):
-            candi.extend(np.arange(i * (val_size + test_size) + val_size, (i + 1) * (val_size + test_size)))
-        valtest_size = test_size
-    candi = np.array(candi)
-    dist = dist[candi]
+    retrieved_class_idx = class2idx[args.retrieved_class]
+    if retrieved_class_idx == -1:
+        print("The class you input is not in the database!")
+        return
 
-    precisions = np.zeros(n_classes)
-    for i in range(n_classes):
-        for j in range(valtest_size):
-            neighbors = np.argsort(dist[i * valtest_size + j])[:args.num_retrieved]
-            belongs = neighbors // train_size == i
-            precisions[i] += belongs.sum()
-        precisions[i] /= args.num_retrieved * valtest_size
-        print("The precision for class {} is {:.3f}".format(classes[i], precisions[i]))
+    retrieved_permed_idx = ori2permed[args.retrieved_idx] - train_size
+    if retrieved_permed_idx < 0:
+        print("You are retrieving a template image!")
+        return
 
-    print("The overall precision is {:.3f}".format(precisions.mean()))
+    neighbors = np.argsort(dist[retrieved_class_idx * valtest_size + retrieved_permed_idx])[:args.num_retrieved]
+    neighbor_class_idx = neighbors // train_size
+    neighbor_inclass_idx = rnd_idx[neighbors % train_size]
+    for i in range(args.num_retrieved):
+        print("The rank {:d} most similar image is {}{:02d}".format(i + 1, classes[neighbor_class_idx[i]], neighbor_inclass_idx[i]))
 
 if __name__ == '__main__':
     main()

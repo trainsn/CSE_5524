@@ -30,13 +30,13 @@ def main():
                 img = resize(img, (256, 256))
 
             save_dict = os.path.join("UCMerced_LandUse", "Features")
-            # for k in range(3):
-            #     color_pch = compute_pch(img, nbins=args.color_bins, levels=k)
-            #     np.save(os.path.join(save_dict, "pch", "level{:d}".format(k), classes[i], "{}{:02d}".format(classes[i], j)),
-            #             color_pch)
-            #
-            # color_mome = compute_color_moment(img)
-            # np.save(os.path.join(save_dict, "cm", classes[i], "{}{:02d}".format(classes[i], j)), color_mome)
+            for k in range(3):
+                color_pch = compute_pch(img, nbins=args.color_bins, levels=k)
+                np.save(os.path.join(save_dict, "pch", "level{:d}".format(k), classes[i], "{}{:02d}".format(classes[i], j)),
+                        color_pch)
+
+            color_mome = compute_color_moment(img)
+            np.save(os.path.join(save_dict, "cm", classes[i], "{}{:02d}".format(classes[i], j)), color_mome)
 
             for k in range(3):
                 texture_phog = compute_phog(img, nbins=args.orient_bins, levels=k)
