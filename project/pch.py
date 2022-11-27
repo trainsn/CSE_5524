@@ -1,8 +1,8 @@
-import pdb
-
 import numpy as np
 from skimage import color
 from utils import *
+
+import pdb
 
 def color_histogram(img, nbins):
     num_channels = 3
@@ -42,6 +42,6 @@ def compute_pch(img, nbins=10, levels=2):
                 binPos += 1
         blocks *= 2
 
-    hist = normalize(hist)
+    hist = l2_normalize(hist)
 
     return hist

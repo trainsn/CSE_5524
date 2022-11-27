@@ -1,5 +1,3 @@
-import pdb
-
 import numpy as np
 import math
 from skimage.feature import canny
@@ -7,6 +5,8 @@ from skimage.filters import sobel_h, sobel_v
 from skimage import io
 from utils import *
 from matplotlib import pyplot as plt
+
+import pdb
 
 PI_OVER_TWO = np.pi / 2.0
 
@@ -89,6 +89,6 @@ def compute_phog(img, nbins, levels):
                 binPos += 1
         blocks *= 2
 
-    desc = normalize(desc)
+    desc = l2_normalize(desc)
 
     return desc

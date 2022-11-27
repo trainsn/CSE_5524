@@ -31,6 +31,6 @@ def compute_color_moment(img):
     for i in range(3):
         moments[(i + 3) * moment_items: (i + 4) * moment_items] = similitudeMoments(hsv[:, :, i])
 
-    moments = normalize(moments)
+    moments = l2_normalize(moments)
     return moments
 
