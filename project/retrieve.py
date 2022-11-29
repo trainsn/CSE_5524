@@ -45,7 +45,7 @@ def main():
     elif args.dist_metric == "SSD":
         dist = np.load(os.path.join(feat_dir, "SSD.npy"))
     elif args.dist_metric == "NCC":
-        dist = np.load(os.path.join(feat_dir, "NCC.npy"))
+        dist = -np.load(os.path.join(feat_dir, "NCC.npy"))
 
     retrieved_class_idx = class2idx[args.retrieved_class]
     if retrieved_class_idx == -1:

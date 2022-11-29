@@ -1,16 +1,18 @@
 import os
 import argparse
 import numpy as np
+from scipy import stats
 
 import pdb
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--num-retrieved', type=int, default=12, help='Number of images retrieved')
+    parser.add_argument('--k', type=int, default=5, help='parameter k for KNN')
     parser.add_argument('--feat-type', type=str, required=True, help='raw, cm, pch, phog')
     parser.add_argument('--level', type=int, default=0, help='level for pch or phog')
     parser.add_argument('--dist-metric', type=str, help='SAD, SSD, NCC')
     parser.add_argument('--dataset', type=str, help='val or test')
+
     args = parser.parse_args()
     print(args)
 
@@ -48,16 +50,31 @@ def main():
     candi = np.array(candi)
     dist = dist[candi]
 
-    precisions = np.zeros(n_classes)
+    confusion = np.zeros((n_classes, n_classes), dtype=int)
+    acc = 0
     for i in range(n_classes):
         for j in range(valtest_size):
-            neighbors = np.argsort(dist[i * valtest_size + j])[:args.num_retrieved]
-            belongs = neighbors // train_size == i
-            precisions[i] += belongs.sum()
-        precisions[i] /= args.num_retrieved * valtest_size
-        print("The accuracy for class {} is {:.3f}".format(classes[i], precisions[i]))
+            neighbors = np.argsort(dist[i * valtest_size + j])[:args.k]
+            neighbor_class_idx = neighbors // train_size
+            pred = stats.mode(neighbor_class_idx)[0][0]
+            acc += pred == i
+            confusion[pred][i] += 1
+    acc /= n_classes * valtest_size
+    print("Overall accuracy: {:.3f}".format(acc))
 
-    print("The overall accuracy is {:.3f}".format(precisions.mean()))
+    for i in range(n_classes):
+        binary_conf = np.zeros((2, 2), dtype=int)
+        not_i = np.ones(n_classes, dtype=bool)
+        not_i[i] = False
+        binary_conf[0, 0] = confusion[i][i]
+        binary_conf[0, 1] = confusion[i][not_i].sum()
+        binary_conf[1, 0] = confusion[not_i][:, i].sum()
+        binary_conf[1, 1] = confusion[not_i][:, not_i].sum()
+
+        precision = binary_conf[0, 0] / (binary_conf[0, 0] + binary_conf[0, 1])
+        recall = binary_conf[0, 0] / (binary_conf[0, 0] + binary_conf[1, 0])
+        f1 = 2 * precision * recall / (precision + recall)
+        print("Class {},\tprecision: {:.3f},\trecall: {:.3f},\tF1: {:.3f}".format(classes[i], precision, recall, f1))
 
 if __name__ == '__main__':
     main()
