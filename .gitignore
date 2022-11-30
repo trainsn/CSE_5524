@@ -132,3 +132,4 @@ dmypy.json
 *.zip
 *.docx
 *.tif
+*.npy

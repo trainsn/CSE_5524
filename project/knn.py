@@ -2,6 +2,8 @@ import os
 import argparse
 import numpy as np
 from scipy import stats
+import matplotlib.pyplot as plt
+from matplotlib.pyplot import MultipleLocator
 
 import pdb
 
@@ -75,6 +77,22 @@ def main():
         recall = binary_conf[0, 0] / (binary_conf[0, 0] + binary_conf[1, 0])
         f1 = 2 * precision * recall / (precision + recall)
         print("Class {},\tprecision: {:.3f},\trecall: {:.3f},\tF1: {:.3f}".format(classes[i], precision, recall, f1))
+
+    fig, ax = plt.subplots(figsize=(13, 13))
+    ax.matshow(confusion, cmap=plt.cm.Blues, alpha=0.3)
+    for i in range(confusion.shape[0]):
+        for j in range(confusion.shape[1]):
+            ax.text(x=j, y=i, s=confusion[i, j], va='center', ha='center', size='medium')
+    plt.xlabel('Actuals', fontsize=18)
+    plt.ylabel('Predictions', fontsize=18)
+    x_major_locator=MultipleLocator(1)
+    y_major_locator=MultipleLocator(1)
+    ax.xaxis.set_major_locator(x_major_locator)
+    ax.yaxis.set_major_locator(y_major_locator)
+    ax.set_xticklabels(['']+classes, rotation=90, fontsize=8)
+    ax.set_yticklabels(['']+classes, fontsize=8)
+    plt.show()
+
 
 if __name__ == '__main__':
     main()
